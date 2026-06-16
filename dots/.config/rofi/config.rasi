@@ -1,0 +1,215 @@
+/*
+ * Rofi launcher config for end_4 / illogical-impulse
+ * HyDE style_1-inspired layout: wallpaper left, list right, vertical sidebar
+ * Wallpaper-adaptive colors via matugen
+ */
+
+configuration {
+    modi:                       "drun,run,window,filebrowser";
+    font:                       "JetBrainsMono Nerd Font 10";
+    show-icons:                 true;
+    icon-theme:                 "Tela-circle-dracula";
+    display-drun:               "󰀻";
+    display-run:                "󰣖";
+    display-window:             "󰖯";
+    display-filebrowser:        "󰉋";
+    drun-display-format:        "{name}";
+    window-format:              "{w} · {c} · {t}";
+    hover-select:               false;
+    scroll-method:              1;
+    me-select-entry:            "";
+    me-accept-entry:            "MousePrimary";
+    cycle:                      true;
+    matching:                   "fuzzy";
+}
+
+@theme "~/.config/rofi/colors.rasi"
+
+window {
+    location:                    center;
+    anchor:                      center;
+    fullscreen:                  false;
+    enabled:                     true;
+    cursor:                      "default";
+    transparency:                "real";
+    spacing:                     0em;
+    padding:                     0em;
+    margin:                      0em;
+    border:                      4px;
+    border-radius:               24px;
+    border-color:                @main-br;
+    background-color:            @main-bg;
+    height:                      33em;
+    width:                       63em;
+}
+
+mainbox {
+    enabled:                     true;
+    spacing:                     0em;
+    padding:                     0em;
+    orientation:                 horizontal;
+    children:                    [ "dummywall", "listbox" ];
+    background-color:            transparent;
+}
+
+/* Left wallpaper panel */
+dummywall {
+    enabled:                     true;
+    spacing:                     0em;
+    padding:                     0em;
+    width:                       37em;
+    expand:                      false;
+    orientation:                 horizontal;
+    children:                    [ "mode-switcher" ];
+    background-color:            transparent;
+    background-image:            url("~/.cache/rofi-wall/wall.thmb", height);
+}
+
+/* Vertical mode sidebar over blurred wallpaper */
+mode-switcher {
+    enabled:                     true;
+    orientation:                 vertical;
+    width:                       3.8em;
+    padding:                     9em 0.5em 9em 0.5em;
+    spacing:                     1.2em;
+    background-color:            transparent;
+    background-image:            url("~/.cache/rofi-wall/wall.blur", height);
+}
+
+button {
+    cursor:                      pointer;
+    border-radius:               2em;
+    padding:                     0.75em 0.75em;
+    horizontal-align:            0.5;
+    vertical-align:              0.5;
+    background-color:            @main-bg;
+    text-color:                  @main-fg;
+}
+
+button selected {
+    background-color:            @main-fg;
+    text-color:                  @main-bg;
+}
+
+/* Right panel: search + app list */
+listbox {
+    enabled:                     true;
+    spacing:                     0.8em;
+    padding:                     1.5em;
+    orientation:                 vertical;
+    children:                    [ "inputbar", "listview" ];
+    background-color:            @background;
+}
+
+inputbar {
+    enabled:                     true;
+    spacing:                     0em;
+    padding:                     0.6em 1em;
+    children:                    [ "textbox-prompt-colon", "entry" ];
+    border-radius:               2em;
+    background-color:            @surface;
+}
+
+textbox-prompt-colon {
+    enabled:                     true;
+    expand:                      false;
+    str:                         "󰍉";
+    padding:                     0em 0.4em 0em 0em;
+    text-color:                  @on-surface-variant;
+    background-color:            transparent;
+}
+
+entry {
+    enabled:                     true;
+    spacing:                     0em;
+    padding:                     0em;
+    text-color:                  @on-surface;
+    cursor:                      text;
+    placeholder:                 "Search";
+    placeholder-color:           @outline;
+    background-color:            transparent;
+}
+
+listview {
+    enabled:                     true;
+    spacing:                     0.4em;
+    padding:                     0em;
+    columns:                     1;
+    lines:                       8;
+    cycle:                       true;
+    dynamic:                     true;
+    scrollbar:                   false;
+    layout:                      vertical;
+    reverse:                     false;
+    fixed-height:                true;
+    fixed-columns:               true;
+    cursor:                      "default";
+    background-color:            transparent;
+    text-color:                  @main-fg;
+}
+
+/* Elements */
+element {
+    enabled:                     true;
+    spacing:                     0.8em;
+    padding:                     0.6em 0.9em;
+    cursor:                      pointer;
+    border-radius:               1em;
+    background-color:            transparent;
+    text-color:                  @main-fg;
+}
+
+element selected.normal {
+    background-color:            @select-bg;
+    text-color:                  @select-fg;
+}
+
+element selected.active {
+    background-color:            @primary-container;
+    text-color:                  @on-primary-container;
+}
+
+element selected.urgent {
+    background-color:            @error-container;
+    text-color:                  @on-error-container;
+}
+
+element normal.normal,
+element normal.active,
+element normal.urgent,
+element alternate.normal,
+element alternate.active,
+element alternate.urgent {
+    background-color:            transparent;
+    text-color:                  @main-fg;
+}
+
+element-icon {
+    size:                        2.8em;
+    cursor:                      inherit;
+    background-color:            transparent;
+    text-color:                  inherit;
+}
+
+element-text {
+    vertical-align:              0.5;
+    horizontal-align:            0.0;
+    cursor:                      inherit;
+    background-color:            transparent;
+    text-color:                  inherit;
+}
+
+/* Error message */
+error-message {
+    text-color:                  @main-fg;
+    background-color:            @main-bg;
+    text-transform:              capitalize;
+    children:                    [ "textbox" ];
+}
+
+textbox {
+    text-color:                  inherit;
+    background-color:            inherit;
+    vertical-align:              0.5;
+    horizontal-align:            0.5;
+}

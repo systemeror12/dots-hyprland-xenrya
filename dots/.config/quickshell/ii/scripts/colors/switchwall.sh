@@ -50,11 +50,35 @@ pre_process() {
     fi
 }
 
+generate_rofi_wallpaper_cache() {
+    local wallpaper_path="$1"
+    local rofi_wall_dir="$HOME/.cache/rofi-wall"
+
+    if [[ -z "$wallpaper_path" || ! -f "$wallpaper_path" ]]; then
+        return
+    fi
+
+    mkdir -p "$rofi_wall_dir"
+
+    # Left panel image: scaled wallpaper, Rofi crops to panel height
+    magick "$wallpaper_path" \
+        -resize 1920x1920\> \
+        "$rofi_wall_dir/wall.thmb"
+
+    # Sidebar background: blurred and dimmed wallpaper
+    magick "$wallpaper_path" \
+        -resize 1920x1920\> \
+        -blur 0x16 \
+        -modulate 70 \
+        "$rofi_wall_dir/wall.blur"
+}
+
 post_process() {
     local screen_width="$1"
     local screen_height="$2"
     local wallpaper_path="$3"
 
+    generate_rofi_wallpaper_cache "$wallpaper_path" &
     handle_kde_material_you_colors &
     "$SCRIPT_DIR/code/material-code-set-color.sh" &
 }
