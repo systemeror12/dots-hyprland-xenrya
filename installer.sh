@@ -200,20 +200,40 @@ if [[ ! -f "$HYPRLAND_CUSTOM_KEYBINDS" ]]; then
     run touch "$HYPRLAND_CUSTOM_KEYBINDS"
 fi
 
-# Add Rofi binds if not already present
-if grep -q 'rofi -show drun' "$HYPRLAND_CUSTOM_KEYBINDS" 2>/dev/null; then
-    info "Rofi keybind already present in custom/keybinds.lua; skipping."
+# Idempotency: detect the Rofi setup by either our marker comment OR the
+# unique combination of unbinds + Rofi bind (covers users who set this up
+# manually or via an older installer version).
+ROFI_INSTALLER_MARKER="-- >>> rofi installer (managed by installer.sh) <<<"
+if grep -qF -e "$ROFI_INSTALLER_MARKER" -- "$HYPRLAND_CUSTOM_KEYBINDS" 2>/dev/null \
+   || { grep -qF -e 'hl.unbind("SUPER + D")' -- "$HYPRLAND_CUSTOM_KEYBINDS" 2>/dev/null \
+        && grep -qF -e 'rofi -show drun' -- "$HYPRLAND_CUSTOM_KEYBINDS" 2>/dev/null; }; then
+    info "Rofi installer block already present in custom/keybinds.lua; skipping."
 else
     append_block "$HYPRLAND_CUSTOM_KEYBINDS" \
         "" \
-        "-- App launcher: Rofi (replaces maximize on SUPER+D)" \
+        "$ROFI_INSTALLER_MARKER" \
+        "-- Remove the conflicting SUPER+D maximize binding defined in hyprland/keybinds.lua" \
+        'hl.unbind("SUPER + D")' \
+        "" \
+        "-- Remove duplicate terminal binds so only SUPER+Return opens the terminal" \
+        'hl.unbind("SUPER + T")' \
+        'hl.unbind("CTRL + ALT + T")' \
+        "" \
+        "-- Free up SUPER+SHIFT+M from the upstream speaker mute toggle so we can use it for maximize" \
+        'hl.unbind("SUPER + SHIFT + M")' \
+        "" \
+        "-- App launcher: Rofi" \
         'hl.bind("SUPER + D", hl.dsp.exec_cmd("rofi -show drun -config ~/.config/rofi/config.rasi"),' \
         '    { description = "App launcher: Rofi" })' \
         "" \
-        "-- Window maximize moved from SUPER+D to SUPER+SHIFT+D" \
-        'hl.bind("SUPER + SHIFT + D", hl.dsp.window.fullscreen({ mode = "maximized", action = "toggle" }),' \
-        '    { description = "Window: Maximize" })'
-    ok "Added Rofi and moved maximize keybinds."
+        "-- Window maximize on SUPER+SHIFT+M" \
+        'hl.bind("SUPER + SHIFT + M", hl.dsp.window.fullscreen({ mode = "maximized", action = "toggle" }),' \
+        '    { description = "Window: Maximize" })' \
+        "" \
+        "-- Speaker mute, relocated from SUPER+SHIFT+M (which is now Maximize)" \
+        'hl.bind("SUPER + SHIFT + ALT + M", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_SINK@ toggle"),' \
+        '    { locked = true, description = "Media: Toggle mute" })'
+    ok "Added Rofi + unbind + maximize keybinds."
 fi
 
 # -----------------------------------------------------------------------------
@@ -264,7 +284,8 @@ fi
 echo ""
 ok "Rofi setup complete!"
 info "Keybinds:"
-echo "  SUPER + D          → Rofi app launcher"
-echo "  SUPER + SHIFT + D  → Maximize window"
+echo "  SUPER + D              → Rofi app launcher"
+echo "  SUPER + SHIFT + M      → Maximize window"
+echo "  SUPER + SHIFT + ALT + M → Toggle speaker mute"
 echo ""
 info "You can switch Rofi modes with Ctrl+Tab while Rofi is open."
