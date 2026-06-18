@@ -81,6 +81,7 @@ post_process() {
     generate_rofi_wallpaper_cache "$wallpaper_path" &
     handle_kde_material_you_colors &
     "$SCRIPT_DIR/code/material-code-set-color.sh" &
+    "$SCRIPT_DIR"/../sddm/update-active-theme.sh &
 }
 
 check_and_prompt_upscale() {

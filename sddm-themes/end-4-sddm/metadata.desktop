@@ -1,0 +1,10 @@
+[SddmGreeterTheme]
+Name=end-4-sddm
+Description=end-4 illogical-impulse SDDM theme
+Type=sddm-theme
+Version=1.0
+MainScript=Main.qml
+ConfigFile=theme.conf
+QtVersion=6
+Theme-Id=end-4-sddm
+Theme-API=2.0
