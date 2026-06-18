@@ -1,6 +1,6 @@
 # Agent Guide
 
-This repository contains a customized Hyprland dotfiles setup based on [end-4/illogical-impulse](https://github.com/end-4/illogical-impulse). It is licensed under GPL-3.0.
+This repository contains a customized Hyprland dotfiles setup based on [end-4/illogical-impulse](https://github.com/end-4/dots-hyprland). It is licensed under GPL-3.0.
 
 ## Repository Layout
 
