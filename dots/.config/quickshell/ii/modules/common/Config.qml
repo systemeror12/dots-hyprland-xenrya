@@ -149,6 +149,12 @@ Singleton {
                 }
             }
 
+            property JsonObject sddm: JsonObject {
+                property bool enableCustomTheme: true
+                property string activeTheme: "end-4-sddm"
+                property bool syncWallpaper: true
+            }
+
             property JsonObject apps: JsonObject {
                 property string bluetooth: "kcmshell6 kcm_bluetooth"
                 property string changePassword: "kitty -1 --hold=yes fish -i -c 'passwd'"

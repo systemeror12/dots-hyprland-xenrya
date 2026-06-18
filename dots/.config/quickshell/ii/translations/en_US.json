@@ -611,5 +611,12 @@
   "Use varying shapes for password characters": "Use varying shapes for password characters",
   "Battery full": "Battery full",
   "Pin": "Pin",
-  "Unpin": "Unpin"
+  "Unpin": "Unpin",
+  "Login": "Login",
+  "SDDM Theme": "SDDM Theme",
+  "Use custom SDDM theme": "Use custom SDDM theme",
+  "Sync wallpaper to SDDM": "Sync wallpaper to SDDM",
+  "Copies the current wallpaper to the SDDM greeter on every wallpaper change": "Copies the current wallpaper to the SDDM greeter on every wallpaper change",
+  "Active theme": "Active theme",
+  "Test": "Test"
 }
