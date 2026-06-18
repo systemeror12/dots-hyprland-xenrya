@@ -66,6 +66,6 @@
     main-fg:                       #e3e2e6E6;
     main-br:                       #afc6ffE6;
     main-ex:                       #c2c5ddE6;
-    select-bg:                     #1b1b1f;
-    select-fg:                     #e3e2e6;
+    select-bg:                     #afc6ff;
+    select-fg:                     #122f61;
 }

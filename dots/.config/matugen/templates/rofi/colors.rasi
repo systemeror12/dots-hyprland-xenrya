@@ -65,6 +65,6 @@
     main-fg:                       {{colors.on_surface.default.hex}}E6;
     main-br:                       {{colors.primary.default.hex}}E6;
     main-ex:                       {{colors.secondary.default.hex}}E6;
-    select-bg:                     {{colors.surface.default.hex}};
-    select-fg:                     {{colors.on_surface.default.hex}};
+    select-bg:                     {{colors.primary.default.hex}};
+    select-fg:                     {{colors.on_primary.default.hex}};
 }

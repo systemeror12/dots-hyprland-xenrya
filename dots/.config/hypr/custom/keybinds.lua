@@ -11,7 +11,8 @@ hl.unbind("CTRL + ALT + T")
 hl.unbind("SUPER + SHIFT + M")
 
 -- App launcher: Rofi (replaces maximize on SUPER+D)
-hl.bind("SUPER + D", hl.dsp.exec_cmd("rofi -show drun -config ~/.config/rofi/config.rasi"),
+-- Uses a wrapper that refreshes the rofi wallpaper cache from the current wallpaper.
+hl.bind("SUPER + D", hl.dsp.exec_cmd("$HOME/.config/rofi/launch.sh"),
     { description = "App launcher: Rofi" })
 
 -- Window maximize on SUPER+SHIFT+M
