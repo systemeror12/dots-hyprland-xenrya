@@ -201,13 +201,12 @@ if [[ ! -f "$HYPRLAND_CUSTOM_KEYBINDS" ]]; then
 fi
 
 # Idempotency: detect the Rofi setup by either our marker comment OR the
-# unique combination of unbinds + Rofi bind (covers users who set this up
-# manually or via an older installer version).
+# SUPER+D unbind (covers users who set this up manually or via an older
+# installer version).
 ROFI_INSTALLER_MARKER="-- >>> rofi installer (managed by installer.sh) <<<"
 if grep -qF -e "$ROFI_INSTALLER_MARKER" -- "$HYPRLAND_CUSTOM_KEYBINDS" 2>/dev/null \
-   || { grep -qF -e 'hl.unbind("SUPER + D")' -- "$HYPRLAND_CUSTOM_KEYBINDS" 2>/dev/null \
-        && grep -qF -e 'rofi -show drun' -- "$HYPRLAND_CUSTOM_KEYBINDS" 2>/dev/null; }; then
-    info "Rofi installer block already present in custom/keybinds.lua; skipping."
+   || grep -qF -e 'hl.unbind("SUPER + D")' -- "$HYPRLAND_CUSTOM_KEYBINDS" 2>/dev/null; then
+    info "Rofi installer block already present in custom/keybinds.lua; skipping append."
 else
     append_block "$HYPRLAND_CUSTOM_KEYBINDS" \
         "" \
@@ -222,8 +221,8 @@ else
         "-- Free up SUPER+SHIFT+M from the upstream speaker mute toggle so we can use it for maximize" \
         'hl.unbind("SUPER + SHIFT + M")' \
         "" \
-        "-- App launcher: Rofi" \
-        'hl.bind("SUPER + D", hl.dsp.exec_cmd("rofi -show drun -config ~/.config/rofi/config.rasi"),' \
+        "-- App launcher: Rofi (wrapper refreshes wallpaper cache from current wallpaper)" \
+        'hl.bind("SUPER + D", hl.dsp.exec_cmd("$HOME/.config/rofi/launch.sh"),' \
         '    { description = "App launcher: Rofi" })' \
         "" \
         "-- Window maximize on SUPER+SHIFT+M" \
@@ -231,9 +230,16 @@ else
         '    { description = "Window: Maximize" })' \
         "" \
         "-- Speaker mute, relocated from SUPER+SHIFT+M (which is now Maximize)" \
-        'hl.bind("SUPER + SHIFT + ALT + M", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_SINK@ toggle"),' \
+        'hl.bind("SUPER + SHIFT + ALT + M", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"),' \
         '    { locked = true, description = "Media: Toggle mute" })'
     ok "Added Rofi + unbind + maximize keybinds."
+fi
+
+# Migrate older binds that launch rofi directly to the wallpaper-syncing wrapper.
+if grep -qF 'rofi -show drun -config ~/.config/rofi/config.rasi' "$HYPRLAND_CUSTOM_KEYBINDS" 2>/dev/null; then
+    log "Migrating SUPER+D bind to use the rofi wallpaper wrapper..."
+    run sed -i 's|rofi -show drun -config ~/.config/rofi/config.rasi|$HOME/.config/rofi/launch.sh|' "$HYPRLAND_CUSTOM_KEYBINDS"
+    ok "Migrated SUPER+D bind to launch.sh."
 fi
 
 # -----------------------------------------------------------------------------
