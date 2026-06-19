@@ -14,17 +14,14 @@ RowLayout {
     }
 
     PowerButton {
-        visible: sddm.canSuspend
         iconText: "bedtime"
         onClicked: sddm.suspend()
     }
     PowerButton {
-        visible: sddm.canReboot
         iconText: "restart_alt"
         onClicked: sddm.reboot()
     }
     PowerButton {
-        visible: sddm.canPowerOff
         iconText: "power_settings_new"
         onClicked: sddm.powerOff()
     }
