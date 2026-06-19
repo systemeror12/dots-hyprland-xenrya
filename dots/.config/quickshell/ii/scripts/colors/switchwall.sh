@@ -60,16 +60,22 @@ generate_rofi_wallpaper_cache() {
 
     mkdir -p "$rofi_wall_dir"
 
-    # Left panel image: scaled wallpaper, Rofi crops to panel height
+    # Left panel image: scaled wallpaper, Rofi crops to panel height.
+    # 1200px on the long edge is plenty for the rendered Rofi window while
+    # keeping decode/render and blur costs low.
     magick "$wallpaper_path" \
-        -resize 1920x1920\> \
+        -resize 1200x1200\> \
+        -strip \
         "$rofi_wall_dir/wall.thmb"
 
-    # Sidebar background: blurred and dimmed wallpaper
+    # Sidebar background: blurred and dimmed wallpaper.
+    # Resize smaller before blurring so the expensive blur operation works on
+    # fewer pixels; the heavy blur hides the lower resolution anyway.
     magick "$wallpaper_path" \
-        -resize 1920x1920\> \
-        -blur 0x16 \
+        -resize 800x800\> \
+        -blur 0x10 \
         -modulate 70 \
+        -strip \
         "$rofi_wall_dir/wall.blur"
 }
 
