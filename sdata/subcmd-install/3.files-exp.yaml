@@ -24,6 +24,14 @@ patterns:
     condition:
       type: "shell"
       value: "fish"
+  # fish/conf.d is excluded from the sync above (protects fish_frozen_* state
+  # files), so repo-managed conf.d snippets are shipped as individual files.
+  - from: "dots/.config/fish/conf.d/30-autostart.fish"
+    to: "$XDG_CONFIG_HOME/fish/conf.d/30-autostart.fish"
+    mode: "soft-backup"
+    condition:
+      type: "shell"
+      value: "fish"
   - from: "dots/.config/zshrc.d"
     to: "$XDG_CONFIG_HOME/zshrc.d"
     mode: "sync"

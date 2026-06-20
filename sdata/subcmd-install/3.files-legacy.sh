@@ -31,6 +31,8 @@ case "${SKIP_FISH}" in
   true) true;;
   *)
     install_dir__sync_exclude dots/.config/fish "$XDG_CONFIG_HOME"/fish "conf.d"
+    v mkdir -p "${XDG_CONFIG_HOME}/fish/conf.d"
+    install_file__auto_backup "dots/.config/fish/conf.d/30-autostart.fish" "${XDG_CONFIG_HOME}/fish/conf.d/30-autostart.fish"
     ;;
 esac
 

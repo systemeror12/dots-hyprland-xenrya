@@ -33,7 +33,7 @@ This repo is a customized fork of [end-4/dots-hyprland](https://github.com/end-4
 
 ### Where custom changes live (conflict surface)
 
-Most custom work is in **new files/dirs** that never touch upstream, so they never conflict: `sddm-themes/`, `installer.sh`, `dots/.config/rofi/`, `dots/.config/matugen/templates/rofi/`, `dots/.config/quickshell/ii/modules/settings/SddmConfig.qml`, `dots/.config/hypr/custom/` (upstream-sanctioned override dir), and this file.
+Most custom work is in **new files/dirs** that never touch upstream, so they never conflict: `sddm-themes/`, `installer.sh`, `dots/.config/rofi/`, `dots/.config/matugen/templates/rofi/`, `dots/.config/quickshell/ii/modules/settings/SddmConfig.qml`, `dots/.config/hypr/custom/` (upstream-sanctioned override dir), `dots/.config/fastfetch/`, `dots/.config/fish/conf.d/`, and this file.
 
 The only edits to **upstream files** (the real conflict surface during rebases) are small appends in:
 - `dots/.config/matugen/config.toml`
@@ -69,6 +69,18 @@ If the rebase hits conflicts, they should be limited to the append-edits listed 
 - **Change install behavior**: edit files in `sdata/lib/` or the `setup` script.
 - **Test an installer change**: use `./installer.sh --dry-run` for the Rofi installer, or run the relevant `./setup` subcommand in a test environment.
 - **Verify Bash syntax**: run `bash -n <script>` or `shellcheck` on executable scripts.
+
+## Fish Shell Autostart
+
+Interactive-session autostart hooks (e.g. fastfetch on terminal open) belong in **`dots/.config/fish/conf.d/NN-name.fish`**, never in `config.fish`.
+
+- **Why `conf.d` and not `config.fish`**: fish sources `conf.d/*.fish` **before** `config.fish`. Putting autostart in `conf.d` makes it run before starship/prompt setup in `config.fish`, which avoids image/prompt race conditions (e.g. a fastfetch kitty-graphics image being lost because the prompt drew over it before the terminal finished decoding). This was a real bug — see the commit that added `30-autostart.fish`.
+- **Load order**: files are sourced alphabetically, so the `NN` numeric prefix controls order. Use `30-` for late autostart (after `fish_frozen_*` migrations), lower numbers for early setup.
+- **`conf.d` is excluded from the fish dir sync** in both install paths (`3.files-exp.yaml: excludes: ["conf.d"]` and `3.files-legacy.sh: install_dir__sync_exclude ... "conf.d"`). This is intentional — `conf.d` holds fish-generated state files (`fish_frozen_key_bindings.fish`, `fish_frozen_theme.fish`) that must not be wiped on sync. **Do not remove this exclusion.**
+- **To ship a repo-managed `conf.d` file**, add a separate targeted entry for the specific file in **both** install paths:
+  - `sdata/subcmd-install/3.files-exp.yaml`: a pattern with `mode: "soft-backup"` and the fish `condition`.
+  - `sdata/subcmd-install/3.files-legacy.sh`: inside the `SKIP_FISH` block, `v mkdir -p "${XDG_CONFIG_HOME}/fish/conf.d"` then `install_file__auto_backup <src> <dst>` (call it **without** the `v`/`x` prefix — see the function's doc-comment in `3.files.sh`). The `mkdir -p` is required because the excluded dir isn't created by the sync.
+- **Guard with `status is-interactive`** inside the snippet so the hook doesn't fire in non-interactive shells.
 
 ## Testing
 
