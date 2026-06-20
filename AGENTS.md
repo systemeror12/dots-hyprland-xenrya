@@ -12,8 +12,47 @@ This repository contains a customized Hyprland dotfiles setup based on [end-4/il
 | `sdata/lib/` | Reusable Bash functions, environment variables, package installers, and distro detection. |
 | `installer.sh` | Standalone Rofi installer; does not run the full `./setup` flow. |
 | `setup` | Main install/update/uninstall entry point. |
+| `sddm-themes/` | Custom SDDM theme sources and install/sync scripts (not in upstream). |
 | `.agents/` | Local agent-only files (gitignored). |
 | `skills-lock.json` | Local opencode skill lockfile (gitignored). |
+
+## Branch Model & Upstream Sync
+
+This repo is a customized fork of [end-4/dots-hyprland](https://github.com/end-4/dots-hyprland), owned and maintained independently. **The intent is to customize and own, not to contribute back to upstream** (the `upstream` remote is fetch-only and is used solely to pull in end-4's improvements). Two remotes are configured:
+
+| Remote | URL | Role |
+|--------|-----|------|
+| `origin` | `github.com/systemeror12/dots-hyprland-xenrya` | Your fork; where `dev` and `main` are pushed. |
+| `upstream` | `github.com/end-4/dots-hyprland` | The source project; **fetch-only, never pushed to**. |
+
+### Branch roles
+
+- **`dev`** is the **GitHub default branch** and the home of all custom work. It is what visitors and `git clone` see, and what `./setup install-files` installs from. It is a strict superset of upstream — always contains upstream's latest merged code plus your customizations on top. Use `git diff main..dev` to see exactly what you've changed relative to upstream.
+- **`main`** is a **clean mirror of `upstream/main`**. It must contain zero custom commits. Its sole purpose is to be a stable upstream baseline for `dev` to rebase onto, making syncs trivial and keeping `git diff main..dev` a precise list of your changes. `main` tracks `upstream/main`.
+- Do **not** let custom merge commits accumulate on `main` (if they do, reset `main` to `upstream/main` with `git push --force-with-lease`). Custom commits belong on `dev` only.
+
+### Where custom changes live (conflict surface)
+
+Most custom work is in **new files/dirs** that never touch upstream, so they never conflict: `sddm-themes/`, `installer.sh`, `dots/.config/rofi/`, `dots/.config/matugen/templates/rofi/`, `dots/.config/quickshell/ii/modules/settings/SddmConfig.qml`, `dots/.config/hypr/custom/` (upstream-sanctioned override dir), and this file.
+
+The only edits to **upstream files** (the real conflict surface during rebases) are small appends in:
+- `dots/.config/matugen/config.toml`
+- `dots/.config/quickshell/ii/modules/common/Config.qml`
+- `dots/.config/quickshell/ii/settings.qml`
+- `dots/.config/quickshell/ii/translations/en_US.json`
+- `dots/.config/quickshell/ii/scripts/colors/switchwall.sh`
+
+Prefer additive edits (append blocks, new files, upstream-sanctioned slots like `hypr/custom/`) over modifying existing upstream lines, to keep future rebases clean.
+
+### Sync workflow
+
+When `upstream` (end-4) advances:
+```bash
+git fetch upstream
+git checkout main && git merge --ff-only upstream/main && git push origin main
+git checkout dev && git rebase main && git push --force-with-lease origin dev
+```
+If the rebase hits conflicts, they should be limited to the append-edits listed above. After resolving, continue with `git rebase --continue` and push with `--force-with-lease` (never `--force`, to protect against remote races).
 
 ## Conventions
 
