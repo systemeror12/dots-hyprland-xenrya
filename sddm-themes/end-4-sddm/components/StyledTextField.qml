@@ -16,6 +16,7 @@ TextField {
     font.pixelSize: 14
     leftPadding: field.icon !== "" ? 44 : 16
     rightPadding: 16
+    horizontalAlignment: TextInput.AlignHCenter
     verticalAlignment: TextInput.AlignVCenter
 
     background: Rectangle {

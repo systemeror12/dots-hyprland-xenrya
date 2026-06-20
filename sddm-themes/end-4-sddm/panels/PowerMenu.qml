@@ -10,6 +10,7 @@ RowLayout {
     component PowerButton: StyledButton {
         rootObj: powerMenu.rootObj
         implicitWidth: 40
+        implicitHeight: 40
         text: ""
     }
 

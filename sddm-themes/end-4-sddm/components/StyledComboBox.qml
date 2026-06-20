@@ -31,6 +31,7 @@ ComboBox {
             color: combo.rootObj ? combo.rootObj.cOnSurface : "#e6e1e1"
             font.family: combo.rootObj ? combo.rootObj.fontFamily : "Sans"
             font.pixelSize: 14
+            horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter
             elide: Text.ElideRight
         }

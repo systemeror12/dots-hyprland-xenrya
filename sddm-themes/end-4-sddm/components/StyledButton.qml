@@ -10,26 +10,29 @@ Button {
 
     implicitHeight: 44
 
-    contentItem: RowLayout {
-        anchors.centerIn: parent
-        spacing: 8
-        Text {
-            visible: button.iconText !== ""
-            text: button.iconText
-            font.family: button.rootObj ? button.rootObj.fontFamilyIcons : "Material Symbols Rounded"
-            font.pixelSize: 18
-            color: button.primary
-                  ? (button.rootObj ? button.rootObj.cOnPrimary : "#322f34")
-                  : (button.rootObj ? button.rootObj.cOnSurface : "#e6e1e1")
-        }
-        Text {
-            text: button.text
-            font.family: button.rootObj ? button.rootObj.fontFamily : "Sans"
-            font.pixelSize: 14
-            font.weight: Font.Medium
-            color: button.primary
-                  ? (button.rootObj ? button.rootObj.cOnPrimary : "#322f34")
-                  : (button.rootObj ? button.rootObj.cOnSurface : "#e6e1e1")
+    contentItem: Item {
+        anchors.fill: parent
+        RowLayout {
+            anchors.centerIn: parent
+            spacing: 8
+            Text {
+                visible: button.iconText !== ""
+                text: button.iconText
+                font.family: button.rootObj ? button.rootObj.fontFamilyIcons : "Material Symbols Rounded"
+                font.pixelSize: 18
+                color: button.primary
+                      ? (button.rootObj ? button.rootObj.cOnPrimary : "#322f34")
+                      : (button.rootObj ? button.rootObj.cOnSurface : "#e6e1e1")
+            }
+            Text {
+                text: button.text
+                font.family: button.rootObj ? button.rootObj.fontFamily : "Sans"
+                font.pixelSize: 14
+                font.weight: Font.Medium
+                color: button.primary
+                      ? (button.rootObj ? button.rootObj.cOnPrimary : "#322f34")
+                      : (button.rootObj ? button.rootObj.cOnSurface : "#e6e1e1")
+            }
         }
     }
 
