@@ -95,6 +95,9 @@ patterns:
   - from: "dots/.config/xdg-desktop-portal"
     to: "$XDG_CONFIG_HOME/xdg-desktop-portal"
     mode: "sync"
+  - from: "dots/.config/fastfetch"
+    to: "$XDG_CONFIG_HOME/fastfetch"
+    mode: "sync"
   # MISC config files (individual files in .config)
   - from: "dots/.config/chrome-flags.conf"
     to: "$XDG_CONFIG_HOME/chrome-flags.conf"
