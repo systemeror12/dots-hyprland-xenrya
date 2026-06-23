@@ -4,8 +4,13 @@ A custom SDDM theme family for the end_4 / illogical-impulse dotfiles setup.
 
 ## Included theme
 
-- `end-4-sddm` — Material You styled login screen with glassmorphism panel,
-  current wallpaper background, and matching colors.
+- `end-4-sddm` — Quickshell-lockscreen-inspired login screen.
+  - Full-wallpaper background.
+  - Large top-left clock and date.
+  - Left-aligned vertical login form: user selector, password field with
+    Quickshell-style shape animation, Login button, session selector, and
+    power actions.
+  - Dynamic Material You colors synced from the current wallpaper.
 
 ## Install
 
@@ -36,14 +41,47 @@ You can also trigger a sync manually:
 ~/.config/quickshell/ii/scripts/sddm/update-active-theme.sh
 ```
 
-## Theme selector
-
-Open **Settings → Login** to pick the active SDDM theme.
-
 ## Test a theme
 
 ```bash
 sddm-greeter-qt6 --test-mode --theme /usr/share/sddm/themes/end-4-sddm/
+```
+
+## Customizing the design (modifiable hotspots)
+
+Most visual tweaks can be made in `sddm-themes/end-4-sddm/theme.conf` before
+installation, or in the installed copy at
+`/usr/share/sddm/themes/end-4-sddm/theme.conf`.
+
+Look for the `HOTSPOT:` comments in these files for the safest places to
+adjust:
+
+- `sddm-themes/end-4-sddm/theme.conf`
+  - Clock position (`clockTopMargin`, `clockLeftMargin`).
+  - Login form position and width (`formTopMargin`, `formLeftMargin`,
+    `formWidth`).
+  - Row/button sizes (`rowHeight`, `rowSpacing`, `buttonHeight`,
+    `sessionButtonHeight`, `powerButtonSize`).
+  - Time/date formats (`timeFormat`, `dateFormat`).
+  - Optional left-side readability scrim (`useLeftScrim`, `scrimColor`,
+    `scrimWidth`).
+  - Fallback Material You colors and fonts.
+
+- `sddm-themes/end-4-sddm/Main.qml`
+  - Color token aliases (auto-filled from `colors.json`).
+  - Geometry property wiring.
+
+- `sddm-themes/end-4-sddm/panels/LoginForm.qml`
+  - Order and visibility of the user row, password field, Login button,
+    session selector, and power buttons.
+
+- `sddm-themes/end-4-sddm/components/PasswordShapes.qml`
+  - Password shape icons and animation timing.
+
+After changing files, reinstall the theme:
+
+```bash
+sudo ./sddm-themes/scripts/install.sh
 ```
 
 ## Add a new theme in the future
