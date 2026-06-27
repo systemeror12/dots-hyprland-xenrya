@@ -50,6 +50,7 @@ Scope {
                 target: GlobalFocusGrab
                 function onDismissed() {
                     GlobalStates.wallpaperSelectorOpen = false;
+                    GlobalStates.wallpaperSelectorAssignMode = "global-default";
                 }
             }
 
@@ -79,6 +80,15 @@ Scope {
 
         function random(): void {
             Wallpapers.randomFromCurrentFolder();
+        }
+
+        function setAssignMode(mode: string): void {
+            GlobalStates.wallpaperSelectorAssignMode = mode;
+        }
+
+        function openWithMode(mode: string): void {
+            GlobalStates.wallpaperSelectorAssignMode = mode;
+            GlobalStates.wallpaperSelectorOpen = true;
         }
     }
 

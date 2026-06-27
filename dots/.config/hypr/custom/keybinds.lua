@@ -22,3 +22,7 @@ hl.bind("SUPER + SHIFT + M", hl.dsp.window.fullscreen({ mode = "maximized", acti
 -- Speaker mute, relocated from SUPER+SHIFT+M (which is now Maximize)
 hl.bind("SUPER + SHIFT + ALT + M", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_SINK@ toggle"),
     { locked = true, description = "Media: Toggle mute" })
+
+-- Per-workspace wallpaper picker
+hl.bind("SUPER + SHIFT + W", hl.dsp.global("quickshell:workspaceWallpaperPickerToggle"),
+    { description = "Shell: Toggle per-workspace wallpaper picker" })

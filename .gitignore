@@ -19,3 +19,6 @@ __pycache__/
 .agents/
 
 skills-lock.json
+
+# docs directory
+/docs/

@@ -155,6 +155,11 @@ Singleton {
                 property bool syncWallpaper: true
             }
 
+            property JsonObject workspaces: JsonObject {
+                property bool enabled: false
+                property list<string> wallpapers: ["", "", "", "", "", "", "", "", "", ""]
+            }
+
             property JsonObject apps: JsonObject {
                 property string bluetooth: "kcmshell6 kcm_bluetooth"
                 property string changePassword: "kitty -1 --hold=yes fish -i -c 'passwd'"
@@ -227,6 +232,8 @@ Singleton {
                     property bool enableSidebar: false
                     property real widgetsFactor: 1.2
                 }
+                property string matugenWallpaperPath: ""
+                property string matugenThumbnailPath: ""
             }
 
             property JsonObject bar: JsonObject {

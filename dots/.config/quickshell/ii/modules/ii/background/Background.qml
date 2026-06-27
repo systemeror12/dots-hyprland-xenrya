@@ -40,13 +40,23 @@ Variants {
         property int workspaceChunkSize: Config?.options.bar.workspaces.shown ?? 10
         property int totalWorkspaces: Math.ceil(lastWorkspaceId / workspaceChunkSize) * workspaceChunkSize
         // Wallpaper
-        property bool wallpaperIsVideo: Config.options.background.wallpaperPath.endsWith(".mp4") || Config.options.background.wallpaperPath.endsWith(".webm") || Config.options.background.wallpaperPath.endsWith(".mkv") || Config.options.background.wallpaperPath.endsWith(".avi") || Config.options.background.wallpaperPath.endsWith(".mov")
-        property string wallpaperPath: wallpaperIsVideo ? Config.options.background.thumbnailPath : Config.options.background.wallpaperPath
+        property bool wallpaperIsVideo: bgRoot.currentWallpaperPath.toLowerCase().endsWith(".mp4") || bgRoot.currentWallpaperPath.toLowerCase().endsWith(".webm") || bgRoot.currentWallpaperPath.toLowerCase().endsWith(".mkv") || bgRoot.currentWallpaperPath.toLowerCase().endsWith(".avi") || bgRoot.currentWallpaperPath.toLowerCase().endsWith(".mov")
+        property string wallpaperPath: wallpaperIsVideo ? Config.options.background.thumbnailPath : bgRoot.currentWallpaperPath
         property bool wallpaperSafetyTriggered: {
             const enabled = Config.options.workSafety.enable.wallpaper;
             const sensitiveWallpaper = (CF.StringUtils.stringListContainsSubstring(wallpaperPath.toLowerCase(), Config.options.workSafety.triggerCondition.fileKeywords));
             const sensitiveNetwork = (CF.StringUtils.stringListContainsSubstring(Network.networkName.toLowerCase(), Config.options.workSafety.triggerCondition.networkNameKeywords));
             return enabled && sensitiveWallpaper && sensitiveNetwork;
+        }
+        readonly property string currentWallpaperPath: {
+            if (Config.options.workspaces.enabled) {
+                const wsId = bgRoot.monitor.activeWorkspace?.id
+                if (wsId >= 1 && wsId <= 10) {
+                    const p = Config.options.workspaces.wallpapers[wsId - 1]
+                    if (p && p.length > 0) return p
+                }
+            }
+            return Config.options.background.wallpaperPath
         }
         readonly property real parallaxRation: Config.options.background.parallax.workspaceZoom
         property real minSuitableScale: 1 // Some reasonable init, to be updated

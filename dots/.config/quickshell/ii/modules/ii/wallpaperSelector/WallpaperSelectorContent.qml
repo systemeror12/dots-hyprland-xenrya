@@ -15,6 +15,8 @@ MouseArea {
     property int columns: 4
     property real previewCellAspectRatio: 4 / 3
     property bool useDarkMode: Appearance.m3colors.darkmode
+    property string assignMode: GlobalStates.wallpaperSelectorAssignMode
+    property var onCancel: null
 
     function updateThumbnails() {
         const totalImageMargin = (Appearance.sizes.wallpaperSelectorItemMargins + Appearance.sizes.wallpaperSelectorItemPadding) * 2;
@@ -42,8 +44,17 @@ MouseArea {
 
     function selectWallpaperPath(filePath) {
         if (filePath && filePath.length > 0) {
-            Wallpapers.select(filePath, root.useDarkMode);
+            if (root.assignMode === "global-default") {
+                Wallpapers.apply(filePath, root.useDarkMode);
+            } else if (root.assignMode === "matugen-baseline") {
+                Wallpapers.setMatugenBaseline(filePath);
+            } else if (root.assignMode.startsWith("per-workspace:")) {
+                const wsid = root.assignMode.split(":")[1];
+                Wallpapers.setWorkspaceWallpaper(wsid, filePath);
+            }
+            GlobalStates.wallpaperSelectorAssignMode = "global-default";
             filterField.text = "";
+            GlobalStates.wallpaperSelectorOpen = false;
         }
     }
 
@@ -58,7 +69,9 @@ MouseArea {
 
     Keys.onPressed: event => {
         if (event.key === Qt.Key_Escape) {
+            if (root.onCancel) root.onCancel();
             GlobalStates.wallpaperSelectorOpen = false;
+            GlobalStates.wallpaperSelectorAssignMode = "global-default";
             event.accepted = true;
         } else if ((event.modifiers & Qt.ControlModifier) && event.key === Qt.Key_V) { // Intercept Ctrl+V to handle "paste to go to" in pickers
             root.handleFilePasting(event);
@@ -427,7 +440,11 @@ MouseArea {
 
                         ToolbarPairedFab {
                             iconText: "close"
-                            onClicked: GlobalStates.wallpaperSelectorOpen = false;
+                            onClicked: {
+                                if (root.onCancel) root.onCancel();
+                                else GlobalStates.wallpaperSelectorOpen = false;
+                                GlobalStates.wallpaperSelectorAssignMode = "global-default";
+                            }
                             StyledToolTip {
                                 text: Translation.tr("Cancel wallpaper selection")
                             }

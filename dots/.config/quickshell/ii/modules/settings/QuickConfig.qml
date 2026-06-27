@@ -123,7 +123,7 @@ ContentPage {
                         text: Translation.tr("Pick wallpaper image on your system")
                     }
                     onClicked: {
-                        Quickshell.execDetached(`${Directories.wallpaperSwitchScriptPath}`);
+                        Quickshell.execDetached([Directories.wallpaperSwitchScriptPath, "--display-only"]);
                     }
                     mainContentComponent: Component {
                         RowLayout {

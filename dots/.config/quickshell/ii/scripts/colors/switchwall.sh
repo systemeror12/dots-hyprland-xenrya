@@ -85,8 +85,10 @@ post_process() {
     local wallpaper_path="$3"
 
     generate_rofi_wallpaper_cache "$wallpaper_path" &
-    handle_kde_material_you_colors &
-    "$SCRIPT_DIR/code/material-code-set-color.sh" &
+    if [[ "$display_only_flag" != "1" ]]; then
+        handle_kde_material_you_colors &
+        "$SCRIPT_DIR/code/material-code-set-color.sh" &
+    fi
     "$SCRIPT_DIR"/../sddm/update-active-theme.sh &
 }
 
@@ -186,6 +188,20 @@ set_thumbnail_path() {
     fi
 }
 
+set_matugen_path() {
+    local path="$1"
+    if [ -f "$SHELL_CONFIG_FILE" ]; then
+        jq --arg path "$path" '.background.matugenWallpaperPath = $path' "$SHELL_CONFIG_FILE" > "$SHELL_CONFIG_FILE.tmp" && mv "$SHELL_CONFIG_FILE.tmp" "$SHELL_CONFIG_FILE"
+    fi
+}
+
+set_matugen_thumbnail_path() {
+    local path="$1"
+    if [ -f "$SHELL_CONFIG_FILE" ]; then
+        jq --arg path "$path" '.background.matugenThumbnailPath = $path' "$SHELL_CONFIG_FILE" > "$SHELL_CONFIG_FILE.tmp" && mv "$SHELL_CONFIG_FILE.tmp" "$SHELL_CONFIG_FILE"
+    fi
+}
+
 categorize_wallpaper() {
     img_cat=$("$SCRIPT_DIR/../ai/gemini-categorize-wallpaper.sh" "$1")
     # notify-send "Wallpaper category" "$img_cat"
@@ -199,7 +215,6 @@ switch() {
     color_flag="$4"
     color="$5"
 
-    # Start Gemini auto-categorization if enabled
     aiStylingEnabled=$(jq -r '.background.widgets.clock.cookie.aiStyling' "$SHELL_CONFIG_FILE")
     if [[ "$aiStylingEnabled" == "true" ]]; then
         categorize_wallpaper "$imgpath" &
@@ -212,39 +227,24 @@ switch() {
     cursorposy=$(bc <<< "scale=0; ($cursorposy - $screeny) * $scale / 1")
     cursorposy_inverted=$((screensizey - cursorposy))
 
-    matugen_args=(--source-color-index 0)
+    enable_apps_shell="true"
+    if [ -f "$SHELL_CONFIG_FILE" ]; then
+        enable_apps_shell=$(jq -r '.appearance.wallpaperTheming.enableAppsAndShell' "$SHELL_CONFIG_FILE")
+    fi
 
-    if [[ "$color_flag" == "1" ]]; then
-        matugen_args+=(color hex "$color")
-        generate_colors_material_args=(--color "$color")
-    else
-        if [[ -z "$imgpath" ]]; then
-            echo 'Aborted'
-            exit 0
-        fi
-
-        check_and_prompt_upscale "$imgpath" &
-        kill_existing_mpvpaper
-
+    # ==============================
+    # DISPLAY-ONLY MODE
+    # ==============================
+    if [[ "$display_only_flag" == "1" ]]; then
         if is_video "$imgpath"; then
             mkdir -p "$THUMBNAIL_DIR"
-
             missing_deps=()
-            if ! command -v mpvpaper &> /dev/null; then
-                missing_deps+=("mpvpaper")
-            fi
-            if ! command -v ffmpeg &> /dev/null; then
-                missing_deps+=("ffmpeg")
-            fi
+            if ! command -v mpvpaper &> /dev/null; then missing_deps+=("mpvpaper"); fi
+            if ! command -v ffmpeg &> /dev/null; then missing_deps+=("ffmpeg"); fi
             if [ ${#missing_deps[@]} -gt 0 ]; then
                 echo "Missing deps: ${missing_deps[*]}"
                 echo "Arch: sudo pacman -S ${missing_deps[*]}"
-                action=$(notify-send \
-                    -a "Wallpaper switcher" \
-                    -c "im.error" \
-                    -A "install_arch=Install (Arch)" \
-                    "Can't switch to video wallpaper" \
-                    "Missing dependencies: ${missing_deps[*]}")
+                action=$(notify-send -a "Wallpaper switcher" -c "im.error" -A "install_arch=Install (Arch)" "Can't switch to video wallpaper" "Missing dependencies: ${missing_deps[*]}")
                 if [[ "$action" == "install_arch" ]]; then
                     kitty -1 sudo pacman -S "${missing_deps[*]}"
                     if command -v mpvpaper &>/dev/null && command -v ffmpeg &>/dev/null; then
@@ -253,54 +253,130 @@ switch() {
                 fi
                 exit 0
             fi
-
-            # Set wallpaper path
+            kill_existing_mpvpaper
             set_wallpaper_path "$imgpath"
-
-            # Set video wallpaper
             local video_path="$imgpath"
             monitors=$(hyprctl monitors -j | jq -r '.[] | .name')
             for monitor in $monitors; do
                 mpvpaper -o "$VIDEO_OPTS" "$monitor" "$video_path" &
                 sleep 0.1
             done
-
-            # Extract first frame for color generation
             thumbnail="$THUMBNAIL_DIR/$(basename "$imgpath").jpg"
             ffmpeg -y -i "$imgpath" -vframes 1 "$thumbnail" 2>/dev/null
-
-            # Set thumbnail path
             set_thumbnail_path "$thumbnail"
+            create_restore_script "$video_path"
+        else
+            set_wallpaper_path "$imgpath"
+            remove_restore
+        fi
+        # Note: thumbnailPath is only set for videos (above). Static images use
+        # wallpaperPath directly; thumbnailPath stays as-is or from a prior video.
+        max_width_desired="$(hyprctl monitors -j | jq '([.[].width] | min)' | xargs)"
+        max_height_desired="$(hyprctl monitors -j | jq '([.[].height] | min)' | xargs)"
+        post_process "$max_width_desired" "$max_height_desired" "$imgpath"
+        return
+    fi
 
+    # ==============================
+    # MATUGEN-ONLY MODE — set baseline
+    # ==============================
+    if [[ "$matugen_only_flag" == "1" ]]; then
+        if is_video "$imgpath"; then
+            thumbnail="$THUMBNAIL_DIR/$(basename "$imgpath").jpg"
+            mkdir -p "$THUMBNAIL_DIR"
+            ffmpeg -y -i "$imgpath" -vframes 1 "$thumbnail" 2>/dev/null
+            if [ -f "$thumbnail" ]; then
+                set_matugen_thumbnail_path "$thumbnail"
+            else
+                echo "Cannot create thumbnail for video"
+                exit 1
+            fi
+        else
+            set_matugen_thumbnail_path "$imgpath"
+        fi
+        set_matugen_path "$imgpath"
+    fi
+
+    # ==============================
+    # COLOR PIPELINE
+    # ==============================
+    if [[ "$matugen_only_flag" != "1" ]]; then
+        original_imgpath="$imgpath"
+        local matugen_path
+        matugen_path=$(jq -r '.background.matugenWallpaperPath // ""' "$SHELL_CONFIG_FILE" 2>/dev/null)
+        if [[ -n "$matugen_path" && -f "$matugen_path" ]]; then
+            imgpath="$matugen_path"
+        fi
+    fi
+
+    matugen_args=(--source-color-index 0)
+
+    if [[ "$color_flag" == "1" ]]; then
+        matugen_args+=(color hex "$color")
+        generate_colors_material_args=(--color "$color")
+    else
+        if [[ -z "$imgpath" ]]; then
+            echo 'Aborted'; exit 0
+        fi
+        check_and_prompt_upscale "$imgpath" &
+        kill_existing_mpvpaper
+
+        if is_video "$imgpath"; then
+            mkdir -p "$THUMBNAIL_DIR"
+            missing_deps=()
+            if ! command -v mpvpaper &> /dev/null; then missing_deps+=("mpvpaper"); fi
+            if ! command -v ffmpeg &> /dev/null; then missing_deps+=("ffmpeg"); fi
+            if [ ${#missing_deps[@]} -gt 0 ]; then
+                echo "Missing deps: ${missing_deps[*]}"
+                echo "Arch: sudo pacman -S ${missing_deps[*]}"
+                action=$(notify-send -a "Wallpaper switcher" -c "im.error" -A "install_arch=Install (Arch)" "Can't switch to video wallpaper" "Missing dependencies: ${missing_deps[*]}")
+                if [[ "$action" == "install_arch" ]]; then
+                    kitty -1 sudo pacman -S "${missing_deps[*]}"
+                    if command -v mpvpaper &>/dev/null && command -v ffmpeg &>/dev/null; then
+                        notify-send 'Wallpaper switcher' 'Alright, try again!' -a "Wallpaper switcher"
+                    fi
+                fi
+                exit 0
+            fi
+            if [[ "$matugen_only_flag" != "1" ]]; then
+                set_wallpaper_path "$original_imgpath"
+                local video_path="$original_imgpath"
+                monitors=$(hyprctl monitors -j | jq -r '.[] | .name')
+                for monitor in $monitors; do
+                    mpvpaper -o "$VIDEO_OPTS" "$monitor" "$video_path" &
+                    sleep 0.1
+                done
+            fi
+            thumbnail="$THUMBNAIL_DIR/$(basename "$original_imgpath").jpg"
+            ffmpeg -y -i "$original_imgpath" -vframes 1 "$thumbnail" 2>/dev/null
+            if [[ "$matugen_only_flag" != "1" ]]; then
+                set_thumbnail_path "$thumbnail"
+            fi
             if [ -f "$thumbnail" ]; then
                 matugen_args+=(image "$thumbnail")
                 generate_colors_material_args=(--path "$thumbnail")
-                create_restore_script "$video_path"
+                if [[ "$matugen_only_flag" != "1" ]]; then
+                    create_restore_script "$video_path"
+                fi
             else
                 echo "Cannot create image to colorgen"
-                remove_restore
-                exit 1
+                remove_restore; exit 1
             fi
         else
             matugen_args+=(image "$imgpath")
             generate_colors_material_args=(--path "$imgpath")
-            # Update wallpaper path in config
-            set_wallpaper_path "$imgpath"
-            remove_restore
+            if [[ "$matugen_only_flag" != "1" ]]; then
+                set_wallpaper_path "$original_imgpath"
+                remove_restore
+            fi
         fi
     fi
 
-    # Determine mode if not set
     if [[ -z "$mode_flag" ]]; then
         current_mode=$(gsettings get org.gnome.desktop.interface color-scheme 2>/dev/null | tr -d "'")
-        if [[ "$current_mode" == "prefer-dark" ]]; then
-            mode_flag="dark"
-        else
-            mode_flag="light"
-        fi
+        [[ "$current_mode" == "prefer-dark" ]] && mode_flag="dark" || mode_flag="light"
     fi
 
-    # enforce dark mode for terminal
     if [[ -n "$mode_flag" ]]; then
         matugen_args+=(--mode "$mode_flag")
         if [[ $(jq -r '.appearance.wallpaperTheming.terminalGenerationProps.forceDarkMode' "$SHELL_CONFIG_FILE") == "true" ]]; then
@@ -315,16 +391,14 @@ switch() {
 
     pre_process "$mode_flag"
 
-    # Check if app and shell theming is enabled in config
-    if [ -f "$SHELL_CONFIG_FILE" ]; then
-        enable_apps_shell=$(jq -r '.appearance.wallpaperTheming.enableAppsAndShell' "$SHELL_CONFIG_FILE")
-        if [ "$enable_apps_shell" == "false" ]; then
-            echo "App and shell theming disabled, skipping matugen and color generation"
-            return
-        fi
+    if [ "$enable_apps_shell" == "false" ]; then
+        echo "App and shell theming disabled, skipping matugen and color generation"
+        max_width_desired="$(hyprctl monitors -j | jq '([.[].width] | min)' | xargs)"
+        max_height_desired="$(hyprctl monitors -j | jq '([.[].height] | min)' | xargs)"
+        post_process "$max_width_desired" "$max_height_desired" "$imgpath"
+        return
     fi
 
-    # Set harmony and related properties
     if [ -f "$SHELL_CONFIG_FILE" ]; then
         harmony=$(jq -r '.appearance.wallpaperTheming.terminalGenerationProps.harmony' "$SHELL_CONFIG_FILE")
         harmonize_threshold=$(jq -r '.appearance.wallpaperTheming.terminalGenerationProps.harmonizeThreshold' "$SHELL_CONFIG_FILE")
@@ -341,7 +415,6 @@ switch() {
     deactivate
     "$SCRIPT_DIR"/applycolor.sh
 
-    # Pass screen width, height, and wallpaper path to post_process
     max_width_desired="$(hyprctl monitors -j | jq '([.[].width] | min)' | xargs)"
     max_height_desired="$(hyprctl monitors -j | jq '([.[].height] | min)' | xargs)"
     post_process "$max_width_desired" "$max_height_desired" "$imgpath"
@@ -354,6 +427,8 @@ main() {
     color_flag=""
     color=""
     noswitch_flag=""
+    display_only_flag=""
+    matugen_only_flag=""
 
     get_type_from_config() {
         jq -r '.appearance.palette.type' "$SHELL_CONFIG_FILE" 2>/dev/null || echo "auto"
@@ -395,13 +470,21 @@ main() {
                     shift
                 fi
                 ;;
+            --display-only)
+                display_only_flag="1"
+                shift
+                ;;
+            --matugen-only)
+                matugen_only_flag="1"
+                shift
+                ;;
             --image)
                 imgpath="$2"
                 shift 2
                 ;;
             --noswitch)
                 noswitch_flag="1"
-                imgpath=$(jq -r '.background.wallpaperPath' "$SHELL_CONFIG_FILE" 2>/dev/null || echo "")
+                imgpath=$(jq -r '(.background.matugenWallpaperPath // "") as $m | if $m == "" then .background.wallpaperPath // "" else $m end' "$SHELL_CONFIG_FILE" 2>/dev/null || echo "")
                 shift
                 ;;
             *)
