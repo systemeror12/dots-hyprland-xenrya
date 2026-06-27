@@ -29,12 +29,10 @@ cache_is_fresh() {
     (( cache_mtime >= wall_mtime ))
 }
 
-# Return 0 if the rofi drun desktop-file cache is at least as new as every
+# Return 0 if the rofi drun desktop-file index is at least as new as every
 # applications/ directory under XDG_DATA_DIRS and XDG_DATA_HOME.
-# Uses two checks:
-#   1. Any .desktop file recursively newer than the cache → added or modified.
-#   2. Directory mtime newer than the cache → a file was deleted.
-# Both must pass for the cache to be considered fresh.
+# A newer directory mtime means a desktop file was added or removed since
+# the cache was written → stale cache → return 1 so the caller invalidates it.
 drun_cache_is_fresh() {
     local cache="${XDG_CACHE_HOME:-${HOME}/.cache}/rofi-drun-desktop.cache"
     [[ -f "$cache" ]] || return 1
@@ -55,17 +53,12 @@ drun_cache_is_fresh() {
         [[ -n "$dir" ]] || continue
         local appdir="${dir}/applications"
         [[ -d "$appdir" ]] || continue
-
-        # Any desktop file modified or added since the cache was built?
-        if find "$appdir" -type f -name '*.desktop' -newer "$cache" -print -quit 2>/dev/null | grep -q .; then
-            return 1
-        fi
-
-        # Any desktop file deleted since the cache was built?
-        # (Directory mtime changes on unlink of any child.)
-        local dir_mtime
-        dir_mtime=$(stat -c %Y "$appdir")
-        if (( dir_mtime > cache_mtime )); then
+        # Find the newest mtime anywhere under this applications tree
+        local newest_mtime
+        newest_mtime=$(find "$appdir" -type f -o -type d | xargs -r stat -c %Y 2>/dev/null | sort -rn | head -n1)
+        # If find returned nothing, use the directory itself
+        newest_mtime="${newest_mtime:-$(stat -c %Y "$appdir")}"
+        if (( newest_mtime > cache_mtime )); then
             return 1
         fi
     done
