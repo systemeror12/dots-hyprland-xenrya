@@ -55,6 +55,11 @@ ApplicationWindow {
             component: "modules/settings/WorkspacesConfig.qml"
         },
         {
+            name: Translation.tr("Rofi"),
+            icon: "apps",
+            component: "modules/settings/RofiConfig.qml"
+        },
+        {
             name: Translation.tr("Interface"),
             icon: "bottom_app_bar",
             component: "modules/settings/InterfaceConfig.qml"

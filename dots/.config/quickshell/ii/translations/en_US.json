@@ -627,5 +627,10 @@
   "Open picker window": "Open picker window",
   "Set": "Set",
   "— none —": "— none —",
-  "Assign to:": "Assign to:"
+  "Assign to:": "Assign to:",
+  "Rofi": "Rofi",
+  "Rofi wallpaper": "Rofi wallpaper",
+  "Choose wallpaper": "Choose wallpaper",
+  "Change wallpaper": "Change wallpaper",
+  "Falls back to the desktop wallpaper when not set.": "Falls back to the desktop wallpaper when not set."
 }
