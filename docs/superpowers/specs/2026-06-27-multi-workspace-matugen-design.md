@@ -47,15 +47,19 @@ property JsonObject workspaces: JsonObject {
 
 ### New argument model
 
-| Flag | Runs matugen? | Sets `background.wallpaperPath`? |
+| Flag(s) | Runs matugen? | Sets `background.wallpaperPath`? |
 |---|---|---|
 | `--display-only --image <p>` *(new)* | No | Yes |
 | `--matugen-only --image <p>` *(new)* | Yes | No (sets `matugenWallpaperPath`) |
-| no flag (existing kdialog picker) | No (now routes to display-only) | Yes |
-| `--mode dark\|light` *(existing)* | Yes — regenerates from `matugenWallpaperPath` | No |
-| `--type <scheme>` *(existing)* | Yes — from `matugenWallpaperPath` | No |
-| `--color <hex\|clear>` *(existing)* | Yes — from `matugenWallpaperPath` | No |
-| `--noswitch` *(existing)* | Yes — from `matugenWallpaperPath` | No |
+| No explicit mode flag *(backward compat)* | Yes, from `wallpaperPath` | Yes — preserves current behavior |
+| `--mode dark\|light` *(existing)* | Yes, from **`matugenWallpaperPath`** → fallback `wallpaperPath` | No (recolor only) |
+| `--type <scheme>` *(existing)* | Yes, from **`matugenWallpaperPath`** → fallback `wallpaperPath` | No |
+| `--color <hex\|clear>` *(existing)* | Yes, from **`matugenWallpaperPath`** → fallback `wallpaperPath` | No |
+| `--noswitch` *(existing)* | Yes, from **`matugenWallpaperPath`** → fallback `wallpaperPath` | No |
+
+**Important:** `--display-only` and `--matugen-only` are **explicit opt-in flags**. Their absence preserves the current behavior (both display + matugen) for backward compatibility with callers like `FirstRunExperience.qml`, `welcome.qml`, and the dead-Quickshell fallback.
+
+**Color source chain:** the `switch()` function's image source for matugen reads `matugenWallpaperPath` if non-empty, otherwise falls back to `wallpaperPath`. This means `--mode`/`--type`/`--color`/`--noswitch` (from QuickConfig dark/light toggle or palette change) always recolor from the matugen baseline, even when called without `--matugen-only`. The **Matugen page** explicitly passes `--matugen-only` to populate the baseline. The **QML picker** (`Wallpapers.apply()`) explicitly passes `--display-only` to skip recoloring.
 
 ### Behavior details
 
@@ -95,8 +99,8 @@ Pure QML binding on `monitor.activeWorkspace` (already used for parallax, Backgr
 
 - `apply(path, darkMode)` → switch to `--display-only --image <path>` (existing picker behavior, decoupled).
 - `setMatugenBaseline(path)` → `switchwall.sh --matugen-only --image <path>`; emits `changed()`.
-- `setWorkspaceWallpaper(wsid, path)` → writes `Config.options.workspaces.wallpapers[String(wsid)] = path`; emits `changed()`. **No script.** If `wsid` is the active workspace, `Background.qml` re-renders via binding.
-- `clearWorkspaceWallpaper(wsid)` → sets slot to `""`.
+- `setWorkspaceWallpaper(wsid, path)` → `Config.setNestedValue("workspaces.wallpapers." + wsid, path)`; emits `changed()`. **No script.** If `wsid` is the active workspace, `Background.qml` re-renders via binding. Uses `setNestedValue` (Config.qml:16) rather than direct property assignment so the JsonAdapter persists the change to disk.
+- `clearWorkspaceWallpaper(wsid)` → `Config.setNestedValue("workspaces.wallpapers." + wsid, "")`.
 
 ### 5c. Workspace wallpaper picker window (new)
 
