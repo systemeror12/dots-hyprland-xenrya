@@ -43,7 +43,7 @@ ContentPage {
             }
 
             onClicked: {
-                Quickshell.callIpc("workspaceWallpaperPicker:toggle");
+                Quickshell.execDetached(["qs", "-c", "ii", "ipc", "call", "workspaceWallpaperPicker", "toggle"]);
             }
         }
     }
@@ -60,22 +60,27 @@ ContentPage {
                 Item {
                     Layout.preferredWidth: 80
                     Layout.preferredHeight: 45
-                    Image {
+                    Rectangle {
                         anchors.fill: parent
-                        source: {
-                            const path = Config.options.workspaces.wallpapers[String(index + 1)];
-                            return (path && path.length > 0) ? path : "";
-                        }
-                        fillMode: Image.PreserveAspectCrop
                         radius: 6
                         clip: true
+                        color: "transparent"
+
+                        Image {
+                            anchors.fill: parent
+                            source: {
+                                const path = Config.options.workspaces.wallpapers[index];
+                                return (path && path.length > 0) ? path : "";
+                            }
+                            fillMode: Image.PreserveAspectCrop
+                        }
                     }
                 }
 
                 StyledText {
                     Layout.fillWidth: true
                     text: {
-                        const path = Config.options.workspaces.wallpapers[String(index + 1)];
+                        const path = Config.options.workspaces.wallpapers[index];
                         return (path && path.length > 0)
                             ? path.split("/").pop()
                             : Translation.tr("— none —");
@@ -87,8 +92,7 @@ ContentPage {
                     materialIcon: "wallpaper"
                     mainText: Translation.tr("Set")
                     onClicked: {
-                        GlobalStates.wallpaperSelectorAssignMode = "per-workspace:" + (index + 1);
-                        GlobalStates.wallpaperSelectorOpen = true;
+                        Quickshell.execDetached(["qs", "-c", "ii", "ipc", "call", "workspaceWallpaperPicker", "openForWorkspace", String(index + 1)]);
                     }
                 }
 

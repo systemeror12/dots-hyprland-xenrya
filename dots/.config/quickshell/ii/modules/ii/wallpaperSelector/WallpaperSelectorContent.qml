@@ -16,6 +16,7 @@ MouseArea {
     property real previewCellAspectRatio: 4 / 3
     property bool useDarkMode: Appearance.m3colors.darkmode
     property string assignMode: GlobalStates.wallpaperSelectorAssignMode
+    property var onCancel: null
 
     function updateThumbnails() {
         const totalImageMargin = (Appearance.sizes.wallpaperSelectorItemMargins + Appearance.sizes.wallpaperSelectorItemPadding) * 2;
@@ -68,7 +69,9 @@ MouseArea {
 
     Keys.onPressed: event => {
         if (event.key === Qt.Key_Escape) {
+            if (root.onCancel) root.onCancel();
             GlobalStates.wallpaperSelectorOpen = false;
+            GlobalStates.wallpaperSelectorAssignMode = "global-default";
             event.accepted = true;
         } else if ((event.modifiers & Qt.ControlModifier) && event.key === Qt.Key_V) { // Intercept Ctrl+V to handle "paste to go to" in pickers
             root.handleFilePasting(event);
@@ -437,7 +440,11 @@ MouseArea {
 
                         ToolbarPairedFab {
                             iconText: "close"
-                            onClicked: GlobalStates.wallpaperSelectorOpen = false;
+                            onClicked: {
+                                if (root.onCancel) root.onCancel();
+                                else GlobalStates.wallpaperSelectorOpen = false;
+                                GlobalStates.wallpaperSelectorAssignMode = "global-default";
+                            }
                             StyledToolTip {
                                 text: Translation.tr("Cancel wallpaper selection")
                             }

@@ -33,14 +33,19 @@ ContentPage {
                 Layout.preferredHeight: 112
                 Layout.alignment: Qt.AlignHCenter
 
-                Image {
+                Rectangle {
                     anchors.fill: parent
-                    source: Config.options.background.matugenThumbnailPath.length > 0
-                        ? Config.options.background.matugenThumbnailPath
-                        : ""
-                    fillMode: Image.PreserveAspectCrop
                     radius: Appearance.rounding.screenRounding - 4
                     clip: true
+                    color: "transparent"
+
+                    Image {
+                        anchors.fill: parent
+                        source: Config.options.background.matugenThumbnailPath.length > 0
+                            ? Config.options.background.matugenThumbnailPath
+                            : ""
+                        fillMode: Image.PreserveAspectCrop
+                    }
                 }
             }
         }
@@ -66,8 +71,7 @@ ContentPage {
             }
 
             onClicked: {
-                GlobalStates.wallpaperSelectorAssignMode = "matugen-baseline";
-                GlobalStates.wallpaperSelectorOpen = true;
+                Quickshell.execDetached(["qs", "-c", "ii", "ipc", "call", "wallpaperSelector", "openWithMode", "matugen-baseline"]);
             }
         }
     }

@@ -46,12 +46,18 @@ Singleton {
     }
 
     function setWorkspaceWallpaper(wsid, path) {
-        Config.setNestedValue("workspaces.wallpapers." + wsid, path);
+        const idx = parseInt(wsid) - 1;
+        var list = [...Config.options.workspaces.wallpapers];
+        list[idx] = path;
+        Config.options.workspaces.wallpapers = list;
         root.changed()
     }
 
     function clearWorkspaceWallpaper(wsid) {
-        Config.setNestedValue("workspaces.wallpapers." + wsid, "");
+        const idx = parseInt(wsid) - 1;
+        var list = [...Config.options.workspaces.wallpapers];
+        list[idx] = "";
+        Config.options.workspaces.wallpapers = list;
         root.changed()
     }
 

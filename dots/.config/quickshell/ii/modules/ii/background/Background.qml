@@ -40,7 +40,7 @@ Variants {
         property int workspaceChunkSize: Config?.options.bar.workspaces.shown ?? 10
         property int totalWorkspaces: Math.ceil(lastWorkspaceId / workspaceChunkSize) * workspaceChunkSize
         // Wallpaper
-        property bool wallpaperIsVideo: bgRoot.currentWallpaperPath.endsWith(".mp4") || bgRoot.currentWallpaperPath.endsWith(".webm") || bgRoot.currentWallpaperPath.endsWith(".mkv") || bgRoot.currentWallpaperPath.endsWith(".avi") || bgRoot.currentWallpaperPath.endsWith(".mov")
+        property bool wallpaperIsVideo: bgRoot.currentWallpaperPath.toLowerCase().endsWith(".mp4") || bgRoot.currentWallpaperPath.toLowerCase().endsWith(".webm") || bgRoot.currentWallpaperPath.toLowerCase().endsWith(".mkv") || bgRoot.currentWallpaperPath.toLowerCase().endsWith(".avi") || bgRoot.currentWallpaperPath.toLowerCase().endsWith(".mov")
         property string wallpaperPath: wallpaperIsVideo ? Config.options.background.thumbnailPath : bgRoot.currentWallpaperPath
         property bool wallpaperSafetyTriggered: {
             const enabled = Config.options.workSafety.enable.wallpaper;
@@ -52,7 +52,7 @@ Variants {
             if (Config.options.workspaces.enabled) {
                 const wsId = bgRoot.monitor.activeWorkspace?.id
                 if (wsId >= 1 && wsId <= 10) {
-                    const p = Config.options.workspaces.wallpapers[String(wsId)]
+                    const p = Config.options.workspaces.wallpapers[wsId - 1]
                     if (p && p.length > 0) return p
                 }
             }
