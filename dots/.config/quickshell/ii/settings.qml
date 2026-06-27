@@ -45,6 +45,16 @@ ApplicationWindow {
             component: "modules/settings/BackgroundConfig.qml"
         },
         {
+            name: Translation.tr("Matugen"),
+            icon: "palette",
+            component: "modules/settings/MatugenConfig.qml"
+        },
+        {
+            name: Translation.tr("Workspaces"),
+            icon: "workspaces",
+            component: "modules/settings/WorkspacesConfig.qml"
+        },
+        {
             name: Translation.tr("Interface"),
             icon: "bottom_app_bar",
             component: "modules/settings/InterfaceConfig.qml"
