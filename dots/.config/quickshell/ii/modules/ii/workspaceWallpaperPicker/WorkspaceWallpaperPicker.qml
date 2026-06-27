@@ -21,7 +21,7 @@ Scope {
 
     Loader {
         id: pickerLoader
-        active: GlobalStates.wallpaperSelectorOpen
+        active: GlobalStates.workspaceWallpaperPickerOpen
 
         sourceComponent: PanelWindow {
             id: panelWindow
@@ -48,7 +48,7 @@ Scope {
             Component.onDestruction: GlobalFocusGrab.removeDismissable(panelWindow)
             Connections {
                 target: GlobalFocusGrab
-                function onDismissed() { GlobalStates.wallpaperSelectorOpen = false; }
+                function onDismissed() { GlobalStates.workspaceWallpaperPickerOpen = false; }
             }
 
             ColumnLayout {
@@ -109,8 +109,8 @@ Scope {
         target: "workspaceWallpaperPicker"
 
         function toggle(): void {
-            GlobalStates.wallpaperSelectorOpen = !GlobalStates.wallpaperSelectorOpen;
-            if (GlobalStates.wallpaperSelectorOpen) {
+            GlobalStates.workspaceWallpaperPickerOpen = !GlobalStates.workspaceWallpaperPickerOpen;
+            if (GlobalStates.workspaceWallpaperPickerOpen) {
                 root.selectedWorkspace = Math.min(root.activeWorkspace, 10);
                 GlobalStates.wallpaperSelectorAssignMode = "per-workspace:" + root.selectedWorkspace;
             }
@@ -123,7 +123,7 @@ Scope {
         onPressed: {
             root.selectedWorkspace = Math.min(root.activeWorkspace, 10);
             GlobalStates.wallpaperSelectorAssignMode = "per-workspace:" + root.selectedWorkspace;
-            GlobalStates.wallpaperSelectorOpen = !GlobalStates.wallpaperSelectorOpen;
+            GlobalStates.workspaceWallpaperPickerOpen = !GlobalStates.workspaceWallpaperPickerOpen;
         }
     }
 }

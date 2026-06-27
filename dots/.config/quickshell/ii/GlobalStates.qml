@@ -29,6 +29,7 @@ Singleton {
     property bool superDown: false
     property bool superReleaseMightTrigger: true
     property bool wallpaperSelectorOpen: false
+    property bool workspaceWallpaperPickerOpen: false
     property string wallpaperSelectorAssignMode: "global-default" // "global-default", "matugen-baseline", or "per-workspace:<N>"
     property bool workspaceShowNumbers: false
 
