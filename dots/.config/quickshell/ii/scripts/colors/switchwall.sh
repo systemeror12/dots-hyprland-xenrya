@@ -300,6 +300,7 @@ switch() {
     # COLOR PIPELINE
     # ==============================
     if [[ "$matugen_only_flag" != "1" ]]; then
+        original_imgpath="$imgpath"
         local matugen_path
         matugen_path=$(jq -r '.background.matugenWallpaperPath // ""' "$SHELL_CONFIG_FILE" 2>/dev/null)
         if [[ -n "$matugen_path" && -f "$matugen_path" ]]; then
@@ -337,16 +338,16 @@ switch() {
                 exit 0
             fi
             if [[ "$matugen_only_flag" != "1" ]]; then
-                set_wallpaper_path "$imgpath"
-                local video_path="$imgpath"
+                set_wallpaper_path "$original_imgpath"
+                local video_path="$original_imgpath"
                 monitors=$(hyprctl monitors -j | jq -r '.[] | .name')
                 for monitor in $monitors; do
                     mpvpaper -o "$VIDEO_OPTS" "$monitor" "$video_path" &
                     sleep 0.1
                 done
             fi
-            thumbnail="$THUMBNAIL_DIR/$(basename "$imgpath").jpg"
-            ffmpeg -y -i "$imgpath" -vframes 1 "$thumbnail" 2>/dev/null
+            thumbnail="$THUMBNAIL_DIR/$(basename "$original_imgpath").jpg"
+            ffmpeg -y -i "$original_imgpath" -vframes 1 "$thumbnail" 2>/dev/null
             if [[ "$matugen_only_flag" != "1" ]]; then
                 set_thumbnail_path "$thumbnail"
             fi
@@ -364,7 +365,7 @@ switch() {
             matugen_args+=(image "$imgpath")
             generate_colors_material_args=(--path "$imgpath")
             if [[ "$matugen_only_flag" != "1" ]]; then
-                set_wallpaper_path "$imgpath"
+                set_wallpaper_path "$original_imgpath"
                 remove_restore
             fi
         fi
