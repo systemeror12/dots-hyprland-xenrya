@@ -36,12 +36,28 @@ Singleton {
     function load () {} // For forcing initialization
     
     function openFallbackPicker(darkMode = Appearance.m3colors.darkmode) {
-        Quickshell.execDetached([Directories.wallpaperSwitchScriptPath, "--mode", darkMode ? "dark" : "light"]);
+        Quickshell.execDetached([Directories.wallpaperSwitchScriptPath, "--display-only", "--mode", darkMode ? "dark" : "light"]);
+    }
+
+    function setMatugenBaseline(path) {
+        if (!path || path.length === 0) return;
+        Quickshell.execDetached([Directories.wallpaperSwitchScriptPath, "--matugen-only", "--image", path]);
+        root.changed()
+    }
+
+    function setWorkspaceWallpaper(wsid, path) {
+        Config.setNestedValue("workspaces.wallpapers." + wsid, path);
+        root.changed()
+    }
+
+    function clearWorkspaceWallpaper(wsid) {
+        Config.setNestedValue("workspaces.wallpapers." + wsid, "");
+        root.changed()
     }
 
     function apply(path, darkMode = Appearance.m3colors.darkmode) {
         if (!path || path.length === 0) return;
-        Quickshell.execDetached([Directories.wallpaperSwitchScriptPath, "--mode", darkMode ? "dark" : "light", "--image", path]);
+        Quickshell.execDetached([Directories.wallpaperSwitchScriptPath, "--display-only", "--mode", darkMode ? "dark" : "light", "--image", path]);
         root.changed()
     }
 
