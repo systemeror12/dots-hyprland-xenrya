@@ -84,7 +84,9 @@ post_process() {
     local screen_height="$2"
     local wallpaper_path="$3"
 
-    generate_rofi_wallpaper_cache "$wallpaper_path" &
+    if [[ "$matugen_only_flag" != "1" ]]; then
+        generate_rofi_wallpaper_cache "$wallpaper_path" &
+    fi
     if [[ "$display_only_flag" != "1" ]]; then
         handle_kde_material_you_colors &
         "$SCRIPT_DIR/code/material-code-set-color.sh" &
