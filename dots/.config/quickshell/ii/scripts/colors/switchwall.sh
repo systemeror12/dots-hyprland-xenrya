@@ -11,6 +11,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SHELL_CONFIG_FILE="$XDG_CONFIG_HOME/illogical-impulse/config.json"
 MATUGEN_DIR="$XDG_CONFIG_HOME/matugen"
 terminalscheme="$SCRIPT_DIR/terminal/scheme-base.json"
+ROFI_REFRESH_SCRIPT="$XDG_CONFIG_HOME/rofi/refresh-wallpaper-cache.sh"
 
 handle_kde_material_you_colors() {
     # Check if Qt app theming is enabled in config
@@ -50,35 +51,6 @@ pre_process() {
     fi
 }
 
-generate_rofi_wallpaper_cache() {
-    local wallpaper_path="$1"
-    local rofi_wall_dir="$HOME/.cache/rofi-wall"
-
-    if [[ -z "$wallpaper_path" || ! -f "$wallpaper_path" ]]; then
-        return
-    fi
-
-    mkdir -p "$rofi_wall_dir"
-
-    # Left panel image: scaled wallpaper, Rofi crops to panel height.
-    # 1200px on the long edge is plenty for the rendered Rofi window while
-    # keeping decode/render and blur costs low.
-    magick "$wallpaper_path" \
-        -resize 1200x1200\> \
-        -strip \
-        "$rofi_wall_dir/wall.thmb"
-
-    # Sidebar background: blurred and dimmed wallpaper.
-    # Resize smaller before blurring so the expensive blur operation works on
-    # fewer pixels; the heavy blur hides the lower resolution anyway.
-    magick "$wallpaper_path" \
-        -resize 800x800\> \
-        -blur 0x10 \
-        -modulate 70 \
-        -strip \
-        "$rofi_wall_dir/wall.blur"
-}
-
 post_process() {
     local screen_width="$1"
     local screen_height="$2"
@@ -86,12 +58,12 @@ post_process() {
 
     if [[ "$matugen_only_flag" != "1" ]]; then
         # Skip Rofi cache refresh when a dedicated Rofi wallpaper is set —
-        # the shared refresh script handles precedence and the cache is
-        # rebuilt on Rofi launch or via set/clear in the settings page.
+        # the shared refresh script handles precedence and can be triggered
+        # via set/clear in the settings page.
         local rofi_wall_path
         rofi_wall_path=$(jq -r '.rofi.wallpaperPath // ""' "$SHELL_CONFIG_FILE" 2>/dev/null)
-        if [[ -z "$rofi_wall_path" || ! -f "$rofi_wall_path" ]]; then
-            generate_rofi_wallpaper_cache "$wallpaper_path" &
+        if [[ -z "$rofi_wall_path" || ! -f "$rofi_wall_path" ]] && [[ -x "$ROFI_REFRESH_SCRIPT" ]]; then
+            "$ROFI_REFRESH_SCRIPT" --path "$wallpaper_path"
         fi
     fi
     if [[ "$display_only_flag" != "1" ]]; then
