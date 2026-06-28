@@ -21,6 +21,7 @@ Singleton {
     readonly property string effectiveDirectory: FileUtils.trimFileProtocol(folderModel.folder.toString())
     property url defaultFolder: Qt.resolvedUrl(`${Directories.pictures}/Wallpapers`)
     property alias folderModel: folderModel // Expose for direct binding when needed
+    property string rofiRefreshScriptPath: `${FileUtils.trimFileProtocol(Directories.scriptPath)}/../../../rofi/refresh-wallpaper-cache.sh`
     property string searchQuery: ""
     readonly property list<string> extensions: [ // TODO: add videos
         "jpg", "jpeg", "png", "webp", "avif", "bmp", "svg"
@@ -58,6 +59,18 @@ Singleton {
         var list = [...Config.options.workspaces.wallpapers];
         list[idx] = "";
         Config.options.workspaces.wallpapers = list;
+        root.changed()
+    }
+
+    function setRofiWallpaper(path) {
+        Config.options.rofi.wallpaperPath = path;
+        Quickshell.execDetached([rofiRefreshScriptPath]);
+        root.changed()
+    }
+
+    function clearRofiWallpaper() {
+        Config.options.rofi.wallpaperPath = "";
+        Quickshell.execDetached([rofiRefreshScriptPath]);
         root.changed()
     }
 
