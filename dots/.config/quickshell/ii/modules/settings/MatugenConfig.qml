@@ -21,7 +21,7 @@ ContentPage {
                 Layout.fillWidth: true
                 wrapMode: Text.WordWrap
                 color: Appearance.colors.colOnLayer0
-                text: Translation.tr("This wallpaper drives your color theme. It is independent of the wallpaper shown on your desktop.")
+                text: Translation.tr("This wallpaper drives your color theme. It does not affect the Rofi background image.")
                 font.pixelSize: Appearance.font.pixelSize.small
             }
         }
