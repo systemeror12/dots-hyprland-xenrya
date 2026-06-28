@@ -70,7 +70,7 @@ Singleton {
 
     function clearRofiWallpaper() {
         Config.options.rofi.wallpaperPath = "";
-        Quickshell.execDetached([rofiRefreshScriptPath]);
+        Quickshell.execDetached([rofiRefreshScriptPath, "--clear"]);
         root.changed()
     }
 
