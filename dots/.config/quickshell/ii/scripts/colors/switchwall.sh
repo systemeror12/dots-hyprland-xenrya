@@ -84,7 +84,16 @@ post_process() {
     local screen_height="$2"
     local wallpaper_path="$3"
 
-    generate_rofi_wallpaper_cache "$wallpaper_path" &
+    if [[ "$matugen_only_flag" != "1" ]]; then
+        # Skip Rofi cache refresh when a dedicated Rofi wallpaper is set —
+        # the shared refresh script handles precedence and the cache is
+        # rebuilt on Rofi launch or via set/clear in the settings page.
+        local rofi_wall_path
+        rofi_wall_path=$(jq -r '.rofi.wallpaperPath // ""' "$SHELL_CONFIG_FILE" 2>/dev/null)
+        if [[ -z "$rofi_wall_path" || ! -f "$rofi_wall_path" ]]; then
+            generate_rofi_wallpaper_cache "$wallpaper_path" &
+        fi
+    fi
     if [[ "$display_only_flag" != "1" ]]; then
         handle_kde_material_you_colors &
         "$SCRIPT_DIR/code/material-code-set-color.sh" &

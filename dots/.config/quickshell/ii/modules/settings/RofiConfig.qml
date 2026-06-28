@@ -8,12 +8,12 @@ import qs.modules.common.functions
 import qs.modules.common.widgets
 
 ContentPage {
-    id: matugenPage
+    id: rofiPage
     forceWidth: true
 
     ContentSection {
-        icon: "palette"
-        title: Translation.tr("Matugen")
+        icon: "apps"
+        title: Translation.tr("Rofi wallpaper")
 
         ConfigRow {
             Layout.bottomMargin: 8
@@ -21,13 +21,13 @@ ContentPage {
                 Layout.fillWidth: true
                 wrapMode: Text.WordWrap
                 color: Appearance.colors.colOnLayer0
-                text: Translation.tr("This wallpaper drives your color theme. It does not affect the Rofi background image.")
+                text: Translation.tr("Falls back to the desktop wallpaper when not set.")
                 font.pixelSize: Appearance.font.pixelSize.small
             }
         }
 
         ConfigRow {
-            visible: Config.options.background.matugenThumbnailPath.length > 0
+            visible: Config.options.rofi.wallpaperPath.length > 0
             Item {
                 Layout.preferredWidth: 200
                 Layout.preferredHeight: 112
@@ -41,8 +41,8 @@ ContentPage {
 
                     Image {
                         anchors.fill: parent
-                        source: Config.options.background.matugenThumbnailPath.length > 0
-                            ? Config.options.background.matugenThumbnailPath
+                        source: Config.options.rofi.wallpaperPath.length > 0
+                            ? Config.options.rofi.wallpaperPath
                             : ""
                         fillMode: Image.PreserveAspectCrop
                     }
@@ -64,14 +64,38 @@ ContentPage {
                     fill: 1
                 }
                 StyledText {
-                    text: Config.options.background.matugenWallpaperPath.length > 0
-                        ? Translation.tr("Change baseline wallpaper")
-                        : Translation.tr("Choose baseline wallpaper")
+                    text: Config.options.rofi.wallpaperPath.length > 0
+                        ? Translation.tr("Change wallpaper")
+                        : Translation.tr("Choose wallpaper")
                 }
             }
 
             onClicked: {
-                Quickshell.execDetached(["qs", "-c", "ii", "ipc", "call", "wallpaperSelector", "openWithMode", "matugen-baseline"]);
+                Quickshell.execDetached(["qs", "-c", "ii", "ipc", "call", "wallpaperSelector", "openWithMode", "rofi"]);
+            }
+        }
+
+        RippleButton {
+            Layout.fillWidth: true
+            implicitHeight: 48
+            buttonRadius: Appearance.rounding.full
+            visible: Config.options.rofi.wallpaperPath.length > 0
+
+            contentItem: RowLayout {
+                anchors.centerIn: parent
+                spacing: 8
+                MaterialSymbol {
+                    iconSize: 20
+                    text: "close"
+                    fill: 1
+                }
+                StyledText {
+                    text: Translation.tr("Clear")
+                }
+            }
+
+            onClicked: {
+                Wallpapers.clearRofiWallpaper();
             }
         }
     }

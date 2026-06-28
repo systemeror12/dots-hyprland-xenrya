@@ -641,6 +641,10 @@ Singleton {
                     property bool force2CharDayOfWeek: true
                 }
             }
+
+            property JsonObject rofi: JsonObject {
+                property string wallpaperPath: ""
+            }
         }
     }
 }

@@ -623,9 +623,15 @@
   "This wallpaper drives your color theme. It is independent of the wallpaper shown on your desktop.": "This wallpaper drives your color theme. It is independent of the wallpaper shown on your desktop.",
   "Choose baseline wallpaper": "Choose baseline wallpaper",
   "Change baseline wallpaper": "Change baseline wallpaper",
+  "This wallpaper drives your color theme. It does not affect the Rofi background image.": "This wallpaper drives your color theme. It does not affect the Rofi background image.",
   "Enable per-workspace wallpapers": "Enable per-workspace wallpapers",
   "Open picker window": "Open picker window",
   "Set": "Set",
   "— none —": "— none —",
-  "Assign to:": "Assign to:"
+  "Assign to:": "Assign to:",
+  "Rofi": "Rofi",
+  "Rofi wallpaper": "Rofi wallpaper",
+  "Choose wallpaper": "Choose wallpaper",
+  "Change wallpaper": "Change wallpaper",
+  "Falls back to the desktop wallpaper when not set.": "Falls back to the desktop wallpaper when not set."
 }

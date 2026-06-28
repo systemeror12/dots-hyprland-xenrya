@@ -51,6 +51,8 @@ MouseArea {
             } else if (root.assignMode.startsWith("per-workspace:")) {
                 const wsid = root.assignMode.split(":")[1];
                 Wallpapers.setWorkspaceWallpaper(wsid, filePath);
+            } else if (root.assignMode === "rofi") {
+                Wallpapers.setRofiWallpaper(filePath);
             }
             GlobalStates.wallpaperSelectorAssignMode = "global-default";
             filterField.text = "";
