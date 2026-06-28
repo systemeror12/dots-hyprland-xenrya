@@ -5,4 +5,5 @@
 # wallpaper changes, so the cache is already fresh at launch time.
 set -euo pipefail
 
+pkill -x rofi 2>/dev/null || true
 exec rofi -show drun -config "${HOME}/.config/rofi/config.rasi" "$@"
