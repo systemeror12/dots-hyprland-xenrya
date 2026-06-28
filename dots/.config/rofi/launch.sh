@@ -4,9 +4,9 @@
 # so the launcher background always matches the desktop wallpaper.
 #
 # Performance note:
-# The expensive ImageMagick work is normally done by switchwall.sh when the
-# wallpaper changes. This script only invokes the cache script before
-# launching rofi, so common Rofi invocations open instantly.
+# The expensive ImageMagick work is handled by refresh-wallpaper-cache.sh
+# which is called before launching rofi, so common Rofi invocations open
+# instantly.
 
 set -euo pipefail
 

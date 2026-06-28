@@ -160,6 +160,10 @@ Singleton {
                 property list<string> wallpapers: ["", "", "", "", "", "", "", "", "", ""]
             }
 
+            property JsonObject rofi: JsonObject {
+                property string wallpaperPath: ""
+            }
+
             property JsonObject apps: JsonObject {
                 property string bluetooth: "kcmshell6 kcm_bluetooth"
                 property string changePassword: "kitty -1 --hold=yes fish -i -c 'passwd'"

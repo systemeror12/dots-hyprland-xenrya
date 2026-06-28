@@ -64,7 +64,7 @@ Singleton {
 
     function setRofiWallpaper(path) {
         Config.options.rofi.wallpaperPath = path;
-        Quickshell.execDetached([rofiRefreshScriptPath]);
+        Quickshell.execDetached([rofiRefreshScriptPath, "--path", path]);
         root.changed()
     }
 

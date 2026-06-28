@@ -6,6 +6,19 @@ set -euo pipefail
 
 CACHE_DIR="${HOME}/.cache/rofi-wall"
 ROFI_CONFIG_FILE="${HOME}/.config/illogical-impulse/config.json"
+CLI_PATH=""
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --path)
+            CLI_PATH="$2"
+            shift 2
+            ;;
+        *)
+            shift
+            ;;
+    esac
+done
 
 # Resolve the wallpaper path Rofi should use.
 get_effective_wallpaper() {
@@ -48,24 +61,34 @@ generate_cache() {
 
     mkdir -p "$CACHE_DIR"
 
+    if ! identify "$wallpaper_path" &>/dev/null; then
+        rm -f "$CACHE_DIR/wall.src"
+        return 1
+    fi
+
     magick "$wallpaper_path" \
         -resize 1200x1200\> \
         -strip \
-        "$thmb"
+        "$thmb" || { rm -f "$CACHE_DIR/wall.src"; return 1; }
 
     magick "$wallpaper_path" \
         -resize 800x800\> \
         -blur 0x10 \
         -modulate 70 \
         -strip \
-        "$blur"
+        "$blur" || { rm -f "$CACHE_DIR/wall.src"; return 1; }
 
     printf '%s' "$wallpaper_path" > "$CACHE_DIR/wall.src"
 }
 
 main() {
     local wallpaper_path
-    wallpaper_path="$(get_effective_wallpaper)"
+
+    if [[ -n "$CLI_PATH" ]]; then
+        wallpaper_path="$CLI_PATH"
+    else
+        wallpaper_path="$(get_effective_wallpaper)"
+    fi
 
     if [[ -z "$wallpaper_path" || ! -f "$wallpaper_path" ]]; then
         exit 0
